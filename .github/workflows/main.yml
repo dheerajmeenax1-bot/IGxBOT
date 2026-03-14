@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Config
 OWNER_ID = 7131424891
 AUTHORIZED_USERS: Set[int] = {OWNER_ID}
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8251249054:AAF8hTREHAyiKORWpZqSZQtwGnTr-Iyf6n8")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 # ⚡ SPEED PRESETS - NOW WITH ZERO DELAYS & 50 WORKERS
 SPEED_OPTIONS = {
