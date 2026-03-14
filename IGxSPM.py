@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 OWNER_ID = 7131424891  
 AUTHORIZED_USERS: Set[int] = {OWNER_ID}
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8632725555:AAE0KBQXVh1Y6GsB3yeiPqz2rYX5jpWlfl4")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 SPEED_OPTIONS = {
     'ultra': {'delay': 0.5, 'name': '⚡ ULTRA (120/min)', 'emoji': '🔴'},
