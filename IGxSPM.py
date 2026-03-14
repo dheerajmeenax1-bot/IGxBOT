@@ -411,5 +411,38 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Invalid user ID")
         return
     
-    if awaiting == 'remove_user_id':
+        if awaiting == 'remove_user_id':
         try:
+            rem_uid = int(text)
+            if rem_uid in AUTHORIZED_USERS:
+                AUTHORIZED_USERS.remove(rem_uid)
+                save_all_data()
+                context.user_data['awaiting'] = None
+                await update.message.reply_text(f"✅ User `{rem_uid}` removed!", parse_mode='Markdown')
+            else:
+                await update.message.reply_text("❌ User ID not found in list.")
+        except ValueError:
+            await update.message.reply_text("❌ Invalid user ID")
+        return
+
+async def main():
+    # Application setup
+    application = Application.builder().token(BOT_TOKEN).build()
+
+    # Handlers
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_handler))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Load data and run
+    load_all_data()
+    logger.info("Bot started...")
+    await application.run_polling()
+
+if __name__ == '__main__':
+    import asyncio
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        pass
+        
