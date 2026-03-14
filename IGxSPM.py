@@ -411,7 +411,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Invalid user ID")
         return
     
-        if awaiting == 'remove_user_id':
+    if awaiting == 'remove_user_id':
         try:
             rem_uid = int(text)
             if rem_uid in AUTHORIZED_USERS:
@@ -420,29 +420,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 context.user_data['awaiting'] = None
                 await update.message.reply_text(f"✅ User `{rem_uid}` removed!", parse_mode='Markdown')
             else:
-                await update.message.reply_text("❌ User ID not found in list.")
+                await update.message.reply_text("❌ User ID list mein nahi hai.")
         except ValueError:
-            await update.message.reply_text("❌ Invalid user ID")
+            await update.message.reply_text("❌ Galat User ID! Sirf numbers dalein.")
         return
 
+# --- BOT STARTUP LOGIC ---
+
 async def main():
-    # Application setup
+    """Bot ko initialize aur start karne wala function"""
+    # Application setup (Token GitHub Secrets se aayega)
     application = Application.builder().token(BOT_TOKEN).build()
 
-    # Handlers
+    # Saare handlers ko register karein
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # Load data and run
+    # Data load karein aur polling start karein
     load_all_data()
-    logger.info("Bot started...")
+    logger.info("⚡ Bot Start Ho Gaya Hai!")
+    
+    # Ye bot ko running rakhta hai
     await application.run_polling()
 
 if __name__ == '__main__':
-    import asyncio
+    # Bot ko run karne ke liye asyncio ka use
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        pass
-        
+        logger.info("🛑 Bot Band Ho Gaya.")
+
