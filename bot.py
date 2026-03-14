@@ -1,28 +1,41 @@
 import asyncio
 import aiohttp
-from cachetools import TTLCache
+from concurrent.futures import ThreadPoolExecutor
 
-# Caching setup
-cache = TTLCache(maxsize=100, ttl=300)  # Cache with a 5-minute TTL
+# Constants
+INSTAGRAM_API_URL = 'https://api.instagram.com/'
+TELEGRAM_API_URL = 'https://api.telegram.org/bot{}/sendMessage'
 
-tasync def fetch(url, session):
-    if url in cache:
-        return cache[url]
-    
-    async with session.get(url) as response:
-        data = await response.json()
-        cache[url] = data  # Cache the result
-        return data
+class InstagramClient:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.session = aiohttp.ClientSession()
 
-async def fetch_batch(urls):
-    async with aiohttp.ClientSession() as session:
-        tasks = [fetch(url, session) for url in urls]
-        return await asyncio.gather(*tasks)
+    async def send_message(self, recipient, message):
+        payload = {'recipient': recipient, 'message': message}
+        async with self.session.post(INSTAGRAM_API_URL + 'send', json=payload) as response:
+            return await response.json()
+
+    async def close(self):
+        await self.session.close()
+
+async def send_messages(client, messages):
+    tasks = [client.send_message(m[0], m[1]) for m in messages]
+    return await asyncio.gather(*tasks)
+
+async def process_messages(messages):
+    clients = [InstagramClient('user1', 'pass1'), InstagramClient('user2', 'pass2')]
+    with ThreadPoolExecutor(max_workers=50) as executor:
+        loop = asyncio.get_event_loop()
+        results = await asyncio.wait([loop.run_in_executor(executor, send_messages, client, messages) for client in clients])
+        for client in clients:
+            await client.close()
+    return results
 
 async def main():
-    urls = ["http://api.example.com/data1", "http://api.example.com/data2"]
-    results = await fetch_batch(urls)
-    print(results)
+    messages = [('recipient1', 'Hello!'), ('recipient2', 'Hi there!')]
+    await process_messages(messages)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())
